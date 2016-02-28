@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Web;
 using System.Net.Http;
 using System.IO;
 using Newtonsoft.Json;
+using RestSharp;
 
 namespace EnvatoNew
 {
@@ -91,12 +85,22 @@ namespace EnvatoNew
         public AccountRoot account = new AccountRoot();
         public void populateUIWithUserInfo()
         {
-            using (var client = new HttpClient())
-            {
-                // TODO: Make a GET request and turn into AccountRoot - can't seem to feckin do it //
-            }
+            var client = new RestClient("https://api.envato.com/v1/market/private/user/account.json");
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("Authorization", "Bearer " + envato.access_token);
+            IRestResponse newResponse = client.Execute(request);
+            account = JsonConvert.DeserializeObject<AccountRoot>(newResponse.Content);
             // Populate the UI with User Info e.g. username / icon //
             UI_USERNAME.Text = "Welcome back, " + account.account.firstname + ".";
+            UI_IMG.ImageLocation = account.account.image;
+            UI_BALANCE.Text = "£" + account.account.balance;
+        }
+
+        private void pictureBox3_Click(object sender, EventArgs e)
+        {
+            PhotoDune photoDuneWindow = new PhotoDune();
+            photoDuneWindow.access_token = envato.access_token;
+            photoDuneWindow.ShowDialog();
         }
     }
 }
