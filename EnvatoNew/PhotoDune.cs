@@ -18,8 +18,8 @@ namespace EnvatoNew
 
         public class Rating
         {
-            public int rating { get; set; }
-            public int count { get; set; }
+            public float rating { get; set; }
+            public float count { get; set; }
         }
 
         public class ThumbnailPreview
@@ -145,10 +145,10 @@ namespace EnvatoNew
         public class Cost
         {
             public int count { get; set; }
-            public int min { get; set; }
-            public int max { get; set; }
+            public float min { get; set; }
+            public float max { get; set; }
             public double avg { get; set; }
-            public int sum { get; set; }
+            public float sum { get; set; }
         }
 
         public class Aggregations
@@ -197,18 +197,54 @@ namespace EnvatoNew
         }
 
         public string access_token { get; set; }
+        public Match single_response { get; set; }
+        public int page = 9;
+        public int start = 0;
+        public bool end = false;
         private async void button1_Click(object sender, EventArgs e)
         {
+            try
+            {
+                picturepanel.Controls.Clear();
+            }
+            catch
+            {
+
+            }
+
+            Dictionary<string, string> allInputs = new Dictionary<string, string>();
+
+            allInputs.Add("colors", UI_COLS.Text);
+            allInputs.Add("date", UI_DATE.SelectedText.Replace(" ", "-").ToLower());
+            allInputs.Add("price_max", UI_PRICE_HIGH.Text);
+            allInputs.Add("price_min", UI_PRICE_LOW.Text);
+            allInputs.Add("term", UI_SEARCH.Text);
+            allInputs.Add("size", UI_SIZE.SelectedText.ToLower());
+            allInputs.Add("tags", UI_TAGS.Text);
+            allInputs.Add("username", UI_USER.Text);
+
             string longurl = "https://api.envato.com/v1/discovery/search/search/item";
             Dictionary<string, string> parameters_1 = new Dictionary<string, string>
             {
                 {"site", "photodune.net"}
             };
 
+            foreach(KeyValuePair<string, string> value in allInputs)
+            {
+                if(!(value.Value == ""))
+                {
+                    parameters_1.Add(value.Key, value.Value);
+                }
+            }
+
             // End of populating parameters dictionary //
 
             var uriBuilder = new UriBuilder(longurl);
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            foreach (KeyValuePair<string, string> entry in parameters_1)
+            {
+                query[entry.Key] = entry.Value;
+            }
             uriBuilder.Query = query.ToString();
             longurl = uriBuilder.ToString();
 
@@ -220,8 +256,147 @@ namespace EnvatoNew
                 RESPONSE = await client.GetStringAsync(longurl);
             }
 
+            RootObject envato = JsonConvert.DeserializeObject<RootObject>(RESPONSE);
+
+            List<PictureBox> thumbnailPreviews = new List<PictureBox>();
+            int count = 1;
+            for (int i = start; i < page; i++)
+            {
+                // Make a new PictureBox //
+
+                PictureBox thumbnail = new PictureBox();
+                thumbnail.Width = 70;
+                thumbnail.Height = 70;
+                if (count == 1)
+                {
+                    thumbnail.Left = 0;
+                    thumbnail.Top = 0;
+                }
+                if (count == 2)
+                {
+                    thumbnail.Left = 80;
+                    thumbnail.Top = 0;
+                }
+                if (count == 3)
+                {
+                    thumbnail.Left = 80+80;
+                    thumbnail.Top = 0;
+                }
+                if (count == 4)
+                {
+                    thumbnail.Left = 0;
+                    thumbnail.Top = 80;
+                }
+                if (count == 5)
+                {
+                    thumbnail.Left = 80;
+                    thumbnail.Top = 80;
+                }
+                if (count == 6)
+                {
+                    thumbnail.Left = 80+80;
+                    thumbnail.Top = 80;
+                }
+
+                if (count == 7)
+                {
+                    thumbnail.Left = 0;
+                    thumbnail.Top = 80+80;
+                }
+                if (count == 8)
+                {
+                    thumbnail.Left = 80;
+                    thumbnail.Top = 80+80;
+                }
+                if (count == 9)
+                {
+                    thumbnail.Left = 80 + 80;
+                    thumbnail.Top = 80+80;
+                }
+
+                try
+                {
+                    thumbnail.ErrorImage = System.Drawing.Image.FromFile(@"Assets\none.png");
+                    thumbnail.ImageLocation = envato.matches[i].previews.thumbnail_preview.small_url;
+                    thumbnail.Tag = JsonConvert.SerializeObject(envato.matches[i]);
+                    thumbnail.Click += (s, es) => {
+                        Match singleMatch = JsonConvert.DeserializeObject<Match>(thumbnail.Tag.ToString());
+                        single_response = singleMatch;
+                        pictureBox2.ImageLocation = singleMatch.previews.thumbnail_preview.large_url;
+                        name.Text = singleMatch.description;
+                        result_name.Text = singleMatch.author_username;
+                        result_name_image.ImageLocation = singleMatch.author_image;
+                        result_name_image.Click += (p, ps) => { EnvatoExplorer envato_explorer_window = new EnvatoExplorer(); envato_explorer_window.envato_explorer.Url = new Uri(singleMatch.author_url); envato_explorer_window.ShowDialog(); };
+                        label8.Text = singleMatch.number_of_sales.ToString() + " Sales";
+                    };
+                } catch
+                {
+                    thumbnail.ImageLocation = @"none.png";
+                    end = true;
+                }
+                
+
+                picturepanel.Controls.Add(thumbnail);
+                thumbnailPreviews.Add(thumbnail);
+
+                count++;
+            }
+        }
+
+        private void Thumbnail_Click(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            EnvatoExplorer envato_explorer_window = new EnvatoExplorer(); envato_explorer_window.envato_explorer.Url = new Uri(single_response.url); envato_explorer_window.ShowDialog();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            EnvatoExplorer envato_explorer_window = new EnvatoExplorer(); envato_explorer_window.envato_explorer.Url = new Uri("http://photodune.net/cart"); envato_explorer_window.ShowDialog();
+        }
+
+        private void pictureBox4_Click(object sender, EventArgs e)
+        {
+            pictureBox5.Visible = true;
+            start -= 9;
+            page -= 9;
+            button1_Click(null, null);
+        }
+
+        private void pictureBox5_Click(object sender, EventArgs e)
+        {
+            if(!end)
+            {
+                pictureBox4.Visible = true;
+                start += 9;
+                page += 9;
+                button1_Click(null, null);
+            } else
+            {
+                pictureBox5.Visible = false;
+            }
+        }
+
+        private void pictureBox6_Click(object sender, EventArgs e)
+        {
             
-            MessageBox.Show(Newtonsoft.Json.Linq.JObject.Parse(RESPONSE).First.ToString());
+        }
+
+        private void pictureBox6_Click_1(object sender, EventArgs e)
+        {
+            pictureBox5.Visible = true;
+            pictureBox4.Visible = false;
+            start = 0;
+            page = 9;
+            button1_Click(null, null);
         }
     }
 }

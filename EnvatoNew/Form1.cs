@@ -93,7 +93,8 @@ namespace EnvatoNew
             // Populate the UI with User Info e.g. username / icon //
             UI_USERNAME.Text = "Welcome back, " + account.account.firstname + ".";
             UI_IMG.ImageLocation = account.account.image;
-            UI_BALANCE.Text = "£" + account.account.balance;
+            UI_BALANCE.Text = "Balance: £" + account.account.balance;
+            label1.Text = "Earnt: £" + account.account.available_earnings;
         }
 
         private void pictureBox3_Click(object sender, EventArgs e)
@@ -101,6 +102,12 @@ namespace EnvatoNew
             PhotoDune photoDuneWindow = new PhotoDune();
             photoDuneWindow.access_token = envato.access_token;
             photoDuneWindow.ShowDialog();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+            File.WriteAllText(@"envatoResponse.nmate", "");
+            this.Dispose();
         }
     }
 }
