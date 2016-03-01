@@ -201,8 +201,13 @@ namespace EnvatoNew
         public int page = 9;
         public int start = 0;
         public bool end = false;
+        public int currentPage = 0;
         private async void button1_Click(object sender, EventArgs e)
         {
+            pictureBox4.Visible = false;
+
+            noSearchMaskBox.Visible = true;
+
             try
             {
                 picturepanel.Controls.Clear();
@@ -226,7 +231,8 @@ namespace EnvatoNew
             string longurl = "https://api.envato.com/v1/discovery/search/search/item";
             Dictionary<string, string> parameters_1 = new Dictionary<string, string>
             {
-                {"site", "photodune.net"}
+                {"site", "photodune.net"},
+                {"page_size", 90.ToString()}
             };
 
             foreach(KeyValuePair<string, string> value in allInputs)
@@ -320,6 +326,7 @@ namespace EnvatoNew
                     thumbnail.ImageLocation = envato.matches[i].previews.thumbnail_preview.small_url;
                     thumbnail.Tag = JsonConvert.SerializeObject(envato.matches[i]);
                     thumbnail.Click += (s, es) => {
+                        noSearchMaskBox.Visible = false;
                         Match singleMatch = JsonConvert.DeserializeObject<Match>(thumbnail.Tag.ToString());
                         single_response = singleMatch;
                         pictureBox2.ImageLocation = singleMatch.previews.thumbnail_preview.large_url;
@@ -328,6 +335,9 @@ namespace EnvatoNew
                         result_name_image.ImageLocation = singleMatch.author_image;
                         result_name_image.Click += (p, ps) => { EnvatoExplorer envato_explorer_window = new EnvatoExplorer(); envato_explorer_window.envato_explorer.Url = new Uri(singleMatch.author_url); envato_explorer_window.ShowDialog(); };
                         label8.Text = singleMatch.number_of_sales.ToString() + " Sales";
+                        textBox1.Text = singleMatch.summary;
+                        label9.Text = singleMatch.name;
+                        label10.Text = "Rating: " + singleMatch.rating.rating.ToString();
                     };
                 } catch
                 {
@@ -373,6 +383,12 @@ namespace EnvatoNew
 
         private void pictureBox5_Click(object sender, EventArgs e)
         {
+            currentPage += 1;
+            if ((currentPage / 2).ToString().Contains("."))
+            {
+                // Has a decimal, can't be even number then //
+                MessageBox.Show("MY GAWD");
+            }
             if(!end)
             {
                 pictureBox4.Visible = true;
