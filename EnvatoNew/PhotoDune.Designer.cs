@@ -394,7 +394,7 @@
             this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox6.TabIndex = 32;
             this.pictureBox6.TabStop = false;
-            this.pictureBox6.Click += new System.EventHandler(this.pictureBox6_Click_1);
+            this.pictureBox6.Click += new System.EventHandler(this.pictureBox6_Click);
             // 
             // textBox1
             // 

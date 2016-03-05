@@ -204,8 +204,6 @@ namespace EnvatoNew
         public int currentPage = 0;
         private async void button1_Click(object sender, EventArgs e)
         {
-            pictureBox4.Visible = false;
-
             noSearchMaskBox.Visible = true;
 
             try
@@ -232,7 +230,8 @@ namespace EnvatoNew
             Dictionary<string, string> parameters_1 = new Dictionary<string, string>
             {
                 {"site", "photodune.net"},
-                {"page_size", 90.ToString()}
+                {"page", 0.ToString()},
+                {"page_size", 9.ToString()},
             };
 
             foreach(KeyValuePair<string, string> value in allInputs)
@@ -375,6 +374,7 @@ namespace EnvatoNew
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
+            currentPage -= 1;
             pictureBox5.Visible = true;
             start -= 9;
             page -= 9;
@@ -384,14 +384,8 @@ namespace EnvatoNew
         private void pictureBox5_Click(object sender, EventArgs e)
         {
             currentPage += 1;
-            if ((currentPage / 2).ToString().Contains("."))
-            {
-                // Has a decimal, can't be even number then //
-                MessageBox.Show("MY GAWD");
-            }
             if(!end)
             {
-                pictureBox4.Visible = true;
                 start += 9;
                 page += 9;
                 button1_Click(null, null);
@@ -403,13 +397,8 @@ namespace EnvatoNew
 
         private void pictureBox6_Click(object sender, EventArgs e)
         {
-            
-        }
-
-        private void pictureBox6_Click_1(object sender, EventArgs e)
-        {
+            currentPage = 0;
             pictureBox5.Visible = true;
-            pictureBox4.Visible = false;
             start = 0;
             page = 9;
             button1_Click(null, null);
